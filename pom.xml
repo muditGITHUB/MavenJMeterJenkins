@@ -1,0 +1,196 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.example</groupId>
+	<artifactId>jmeter-maven</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>jmeter-maven</name>
+	<url>http://maven.apache.org</url>
+	<!-- mvn clean verify -DthreadGroup.threads=2 -DthreadGroup.rampup=25 -DthreadGroup.duration=120 -DthreadGroup.startupDelay=0 -DtestPlan.host=jmeter.apache.org -DtestPlan.port=80 -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<threadGroup.threads>2</threadGroup.threads>
+		<threadGroup.rampup>25</threadGroup.rampup>
+		<!-- <threadGroup.iterations>1</threadGroup.iterations> -->
+		<threadGroup.duration>120</threadGroup.duration>
+		<threadGroup.startupDelay>0</threadGroup.startupDelay>
+		<testPlan.host>jmeter.apache.org</testPlan.host>
+		<testPlan.port>80</testPlan.port>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+                <groupId>com.lazerycode.jmeter</groupId>
+                <artifactId>jmeter-maven-plugin</artifactId>
+                <version>2.7.0</version>
+                <executions>
+                    <execution>
+                        <id>jmeter-tests</id>
+                        <goals>
+                            <goal>jmeter</goal>
+                        </goals>
+                    </execution>
+                </executions>
+				<configuration>
+					<jmeterVersion>4.0</jmeterVersion>
+					<resultsFileFormat>jtl</resultsFileFormat>
+					<testFilesDirectory>${basedir}/src/test/jmeter/testfiles/testplan</testFilesDirectory>
+					<testFilesIncluded>
+						<!-- <jMeterTestFile>demosite.jmx</jMeterTestFile> -->
+                        <jMeterTestFile>jmetertest.jmx</jMeterTestFile>
+                    </testFilesIncluded>
+					<testFilesExcluded>
+                        <excludeJMeterTestFile>jmeter-maven_v*.jmx</excludeJMeterTestFile>
+                    </testFilesExcluded>
+					<appendResultsTimestamp>true</appendResultsTimestamp>
+					<resultsFileNameDateFormat>MMMM, yyyy</resultsFileNameDateFormat>
+					<!-- ${__P(threadgroup.threadcount,1)} -->
+		    <propertiesUser>
+                        <threads>${threadGroup.threads}</threads>
+                        <rampup>${threadGroup.rampup}</rampup>
+						<!-- <testIterations>${testplan.iterations}</testIterations> -->
+						<duration>${threadGroup.duration}</duration>
+						<startupDelay>${threadGroup.startupDelay}</startupDelay>
+						<host>${testPlan.host}</host>
+						<port>${testPlan.port}</port>
+		    </propertiesUser>
+                    <jMeterProcessJVMSettings>
+                        <xms>1024</xms>
+                        <xmx>1024</xmx>
+		<!--				<arguments>
+							<argument>-Xprof</argument>
+							<argument>-Xfuture</argument>
+						</arguments> -->
+                    </jMeterProcessJVMSettings>
+					<jmeterExtensions>
+                        <artifact>kg.apc:jmeter-plugins-cmd:2.1</artifact>
+						<artifact>kg.apc:jmeter-plugins-manager:0.19</artifact>
+						<artifact>kg.apc:jmeter-plugins-perfmon:2.1</artifact>
+						<artifact>kg.apc:jmeter-plugins-autostop:0.1</artifact>
+						<artifact>kg.apc:jmeter-plugins-pde:0.1</artifact>
+						<artifact>kg.apc:jmeter-plugins-wsc:0.2</artifact>
+						<artifact>kg.apc:jmeter-plugins-csl:0.1</artifact>
+						<artifact>kg.apc:jmeter-plugins-jmxmon:0.2</artifact>
+                    </jmeterExtensions>
+					<!-- <downloadExtensionDependencies>false</downloadExtensionDependencies> -->
+					  <excludedArtifacts>
+                             <exclusion>commons-pool2:commons-pool2</exclusion>
+                             <exclusion>commons-math3:commons-math3</exclusion>
+                             <exclusion>org.slf4j:slf4j-nop</exclusion>
+                             <exclusion>logkit:logkit</exclusion>
+                             <exclusion>avalon-logkit:avalon-logkit</exclusion>
+                             <exclusion>jdom:jdom</exclusion>
+                             <exclusion>log4j:log4j</exclusion>
+                             <exclusion>commons-logging:commons-logging</exclusion>
+                             <exclusion>excalibur-logger:excalibur-logger</exclusion>
+                        </excludedArtifacts>
+						<!-- Distributed testing --> 
+                                        <propertiesSystem>
+                                                <java.rmi.server.hostname>192.168.49.132</java.rmi.server.hostname>
+                                        </propertiesSystem>
+					
+                  <!--              <remoteConfig>
+					<startServersBeforeTests>true</startServersBeforeTests>	
+					<serverList>192.168.49.131</serverList>
+					<stopServersAfterTests>true</stopServersAfterTests>
+                                </remoteConfig> -->
+                </configuration>
+            </plugin>
+		<plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+                        <configuration>
+                            <target>
+								<zip destfile="${basedir}/target/jmeter/reports/jmeterHTMLReport.zip"
+									 basedir="${basedir}/target/jmeter/reports"
+								  />
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/com.lazerycode.jmeter/jmeter-maven-plugin -->
+		<dependency>
+			<groupId>com.lazerycode.jmeter</groupId>
+			<artifactId>jmeter-maven-plugin</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_core -->
+		<dependency>
+		<groupId>org.apache.jmeter</groupId>
+		<artifactId>ApacheJMeter_core</artifactId>
+		<version>4.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.lazerycode.jmeter/jmeter-analysis-maven-plugin -->
+		<dependency>
+			<groupId>com.lazerycode.jmeter</groupId>
+			<artifactId>jmeter-analysis-maven-plugin</artifactId>
+			<version>1.0.6</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-cmd -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-cmd</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-manager -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-manager</artifactId>
+			<version>0.19</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-perfmon -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-perfmon</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-autostop -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-autostop</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-pde -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-pde</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-wsc -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-wsc</artifactId>
+			<version>0.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-csl -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-csl</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/kg.apc/jmeter-plugins-jmxmon -->
+		<dependency>
+			<groupId>kg.apc</groupId>
+			<artifactId>jmeter-plugins-jmxmon</artifactId>
+			<version>0.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-antrun-plugin</artifactId>
+			<version>1.8</version>
+		</dependency>
+	</dependencies>
+</project>
